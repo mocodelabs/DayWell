@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+/*
+ * DayWell design tokens. Change the palette here only — components use the semantic names (bg, surface, primary…),
+ * never raw hex values. Dark mode re-maps the same names.
+ */
+:root {
+  --dw-cream: #f7f4ed;
+  --dw-surface: #ffffff;
+  --dw-surface-2: #fbfaf6;
+  --dw-forest: #466b52;
+  --dw-forest-strong: #3a5a45;
+  --dw-sage: #dce7d8;
+  --dw-sage-soft: #edf3ea;
+  --dw-terracotta: #c77b61;
+  --dw-terracotta-soft: #f6e6df;
+  --dw-amber: #d7aa62;
+  --dw-amber-soft: #f7ecd8;
+  --dw-text: #29352e;
+  --dw-muted: #5f655c; /* PRD #737970 darkened: 4.06:1 on cream failed WCAG 1.4.3; this is ≥4.7:1 on every light surface */
+  --dw-border: #e5e3dc;
+  --dw-danger: #a8473a;
+  --dw-danger-soft: #f5e1dd;
+  --dw-focus: #2f5b3e;
+  --dw-shadow: 0 1px 2px rgb(41 53 46 / 0.06), 0 4px 16px rgb(41 53 46 / 0.06);
+  --dw-text-scale: 1;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --dw-cream: #171c19;
+  --dw-surface: #20271f;
+  --dw-surface-2: #1c221c;
+  --dw-forest: #8fbf9c;
+  --dw-forest-strong: #a9d3b4;
+  --dw-sage: #2c3a2f;
+  --dw-sage-soft: #253027;
+  --dw-terracotta: #e09a80;
+  --dw-terracotta-soft: #3b2a24;
+  --dw-amber: #e2bd7e;
+  --dw-amber-soft: #3a3122;
+  --dw-text: #eef0ea;
+  --dw-muted: #a7ada4;
+  --dw-border: #333c34;
+  --dw-danger: #e88b7d;
+  --dw-danger-soft: #3d2622;
+  --dw-focus: #a9d3b4;
+  --dw-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--dw-cream);
+  --color-surface: var(--dw-surface);
+  --color-surface-2: var(--dw-surface-2);
+  --color-primary: var(--dw-forest);
+  --color-primary-strong: var(--dw-forest-strong);
+  --color-sage: var(--dw-sage);
+  --color-sage-soft: var(--dw-sage-soft);
+  --color-terracotta: var(--dw-terracotta);
+  --color-terracotta-soft: var(--dw-terracotta-soft);
+  --color-amber: var(--dw-amber);
+  --color-amber-soft: var(--dw-amber-soft);
+  --color-ink: var(--dw-text);
+  --color-muted: var(--dw-muted);
+  --color-line: var(--dw-border);
+  --color-danger: var(--dw-danger);
+  --color-danger-soft: var(--dw-danger-soft);
+  --color-on-primary: var(--dw-surface);
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --radius-card: 1rem;
+  --radius-control: 0.75rem;
+  --shadow-card: var(--dw-shadow);
+}
+
+html {
+  font-size: calc(100% * var(--dw-text-scale));
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible, consistent keyboard focus (WCAG 2.4.7 / 2.4.11). */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--dw-focus);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+.dw-reduce-motion *,
+.dw-reduce-motion *::before,
+.dw-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes dw-ring {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-12deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-6deg); }
+  80% { transform: rotate(4deg); }
+}
+.dw-ringing { animation: dw-ring 1.2s ease-in-out infinite; transform-origin: 50% 10%; }
+
+@keyframes dw-fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.dw-enter { animation: dw-fade-up 0.2s ease-out both; }
+
+.sr-only-focusable:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* FullCalendar → DayWell tokens */
+.fc {
+  --fc-border-color: var(--color-line);
+  --fc-page-bg-color: var(--color-surface);
+  --fc-neutral-bg-color: var(--color-surface-2);
+  --fc-today-bg-color: var(--color-sage-soft);
+  --fc-event-bg-color: var(--color-primary);
+  --fc-event-border-color: var(--color-primary);
+  --fc-event-text-color: var(--color-on-primary);
+  --fc-now-indicator-color: var(--color-terracotta);
+  --fc-button-bg-color: var(--color-surface);
+  --fc-button-text-color: var(--color-ink);
+  --fc-button-border-color: var(--color-line);
+  --fc-button-hover-bg-color: var(--color-sage-soft);
+  --fc-button-hover-border-color: var(--color-line);
+  --fc-button-active-bg-color: var(--color-sage);
+  --fc-button-active-border-color: var(--color-line);
+  font-size: 0.875rem;
+}
+.fc .fc-toolbar-title { font-size: 1.125rem; font-weight: 600; }
+.fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: var(--color-ink); text-decoration: none; }
+.fc .fc-event { border-radius: 0.375rem; padding: 0 2px; cursor: pointer; }
+.fc .dw-event-task { background: var(--color-amber-soft); border-color: var(--color-amber); color: var(--color-ink); }
+/* FullCalendar colours the inner elements, not the event box — tasks must be dark text on amber (WCAG 1.4.3). */
+.fc .dw-event-task .fc-event-main, .fc .dw-event-task .fc-event-title, .fc .dw-event-task .fc-event-time { color: var(--color-ink); }
+.fc .dw-event-attended { opacity: 0.75; }
+/* FullCalendar fades days outside the month to 30% opacity (1.8:1 contrast). Use the accessible muted colour instead. */
+.fc .fc-day-other .fc-daygrid-day-top { opacity: 1; }
+.fc .fc-day-other .fc-daygrid-day-number { color: var(--color-muted); }

@@ -1,0 +1,16 @@
+# TLS-terminating reverse proxy in front of the nginx `web` service.
+# DAYWELL_SITE_ADDRESS = your public hostname (e.g. daywell.example.com) → Caddy obtains a Let's Encrypt certificate.
+# For a local verification run use "localhost" → Caddy issues a certificate from its own internal CA.
+{
+	email {$ACME_EMAIL:admin@localhost}
+}
+
+{$DAYWELL_SITE_ADDRESS:localhost} {
+	encode zstd gzip
+	# Caddy sets X-Forwarded-Proto/For/Host; nginx passes them on and Django trusts NUM_PROXIES=2 (Caddy + nginx).
+	reverse_proxy web:80
+	log {
+		output stdout
+		format json
+	}
+}

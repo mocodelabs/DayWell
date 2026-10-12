@@ -1,0 +1,19 @@
+# Backlog — formally deferred features
+
+None of these are implemented, and nothing in the UI pretends they are (task "attachments" are **links only** and labelled
+as such). Each needs a decision or an external dependency before it can be built and tested properly.
+
+| Priority | Feature | User value | Dependencies | Security / privacy implications | Effort | Acceptance criteria |
+|---|---|---|---|---|---|---|
+| **P1** | **Offline read + queued writes** | Use Today/tasks/habits on a train or in poor coverage | IndexedDB persistence (TanStack Query persister), a write queue with idempotency keys, server-side conflict rules (last-write-wins on edits, explicit conflict UI for deletes) | Personal data would rest in browser storage — needs opt-in per device, cleared on sign-out, never on shared devices; journal excluded | 2–3 weeks | Airplane-mode e2e: read cached Today, complete a task and a habit offline, reconnect → synced once, no duplicates; conflicting edit shows a choice; sign-out wipes the cache |
+| **P1** | **Native alarm shells** (only if closed-app ringing becomes a requirement) | Alarms that ring when the app is closed / phone asleep | See `REAL_DEVICE_TESTING.md` §native plan; app-store accounts | Push tokens stored like Web Push subscriptions; entitlement reviews | 3–5 weeks per platform | Device-lab matrix passes; evidence levels preserved |
+| **P2** | **Google / Outlook calendar sync** | One calendar instead of two | OAuth apps (Google Cloud, Microsoft Entra), verification, webhook/subscription renewal, incremental sync tokens, Celery sync jobs | OAuth tokens encrypted at rest with rotation; least-privilege scopes (`calendar.events`); revoke on disconnect; data-processing disclosure | 3–4 weeks | Connect/disconnect; two-way edits within 5 min; recurring exceptions round-trip; token revocation handled; no duplicates after re-sync |
+| **P2** | **File attachments on tasks** | Keep the bill PDF or a photo with the task | Object storage (S3-compatible) with signed URLs, size/type limits, malware scanning, quota | Private bucket, per-owner signed URLs with short expiry, content-type sniffing, AV scan before download, included in export and deletion | 1–2 weeks | Upload ≤10 MB of allowed types, download only by owner (404 otherwise), deleted with task/account, appears in export |
+| **P3** | **Book metadata lookup** | Faster book entry with covers | Open Library or Google Books API (rate limits; Google needs a key) | Search terms leave the server — proxy via backend, no user identifiers sent; cache results | 3–5 days | Search by title/ISBN fills title/author/pages/cover; works when the API is down (manual entry unaffected) |
+| **P3** | **Weather in the briefing** | Plan the day around weather | Weather API (e.g. Open-Meteo, no key) and the user's location | Location is sensitive: opt-in, city-level only, stored as coordinates rounded to ~10 km, never shared | 3–5 days | Off by default; when on, briefing shows today's forecast or nothing if unavailable (never stale data presented as current) |
+| **P3** | **AI-generated suggestions** | Smarter phrasing and planning help | LLM provider, cost controls, evaluation set | Off by default (setting exists, disabled); journal never sent without explicit consent (`journal_ai_consent`); suggestions visually distinct; never auto-apply calendar changes | 2–3 weeks | Feature flag + per-user opt-in; prompts contain only fields listed in a data inventory; suggestions require acceptance; red-team for fabricated data |
+
+## Release priorities
+1. **Before public launch:** real-device notification checklist, manual screen-reader pass, production deployment on a Linux host with real TLS, monitoring/alerting wired to the health endpoints.
+2. **Next release:** offline read + queued writes (P1).
+3. **Later:** calendar sync and attachments (P2), then metadata, weather, AI (P3).

@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+backend/.venv/
+backend/.env
+backend/staticfiles/
+backend/celerybeat-schedule*
+.pytest_cache/
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+# Local
+.env
+*.log
+backups/
+.ruff_cache/
+frontend/*.tsbuildinfo

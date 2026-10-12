@@ -1,0 +1,27 @@
+line-length = 190
+target-version = "py313"
+extend-exclude = ["migrations", ".venv", "staticfiles"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "SIM", "C4", "PIE", "RUF"]
+ignore = [
+  "S101",   # assert is used by tests
+  "S105", "S106",  # test passwords / "token" field names are not secrets
+  "RUF012", # mutable class attributes on DRF views are conventional
+  "DJ001",  # nullable CharFields are used deliberately only where documented
+  "B904",   # DRF exceptions are re-raised without chaining by design
+  "RUF001", "RUF002", "RUF003",  # typographic punctuation in user-facing text
+  "SIM108",
+  "DJ008",  # internal log/history models have no meaningful __str__
+  "SIM115",  # FileResponse closes the file it is given
+]
+
+[lint.per-file-ignores]
+"**/tests/**" = ["S", "B018", "RUF015", "E501", "N802", "SIM117"]
+"apps/attendance/views.py" = ["E501"]
+"apps/core/testing.py" = ["S"]
+"apps/core/management/commands/seed_demo.py" = ["S"]
+"config/settings.py" = ["E501"]
+
+[lint.isort]
+known-first-party = ["apps", "config"]
