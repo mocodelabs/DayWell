@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from apps.accounts.models import AuditEvent
 from apps.accounts.services import audit
 from apps.core.health import HEARTBEAT_KEY
+from apps.core.scheduler import maybe_run_inline
 from apps.core.timeutils import get_zone
 from apps.core.viewsets import OwnedModelViewSet
 from apps.preferences.models import NotificationPreference
@@ -94,6 +95,7 @@ class AlarmViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=["get"])
     def active(self, request):
+        maybe_run_inline()
         return self._list(selectors.active_alarms(request.user)[:20])
 
     @action(detail=False, methods=["get"])

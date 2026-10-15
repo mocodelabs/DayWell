@@ -6,7 +6,7 @@ from django.http import FileResponse, Http404
 from django.urls import include, path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from apps.core import health
+from apps.core import health, scheduler
 
 API_APPS = ["accounts", "preferences", "tasks", "events", "reminders", "habits", "affirmations", "reading", "fitness", "wellness", "insights", "briefing"]
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path("health/live/", health.live),
     path("health/ready/", health.ready),
     path("health/scheduler/", health.scheduler),
+    path("internal/tick/", scheduler.tick),
     path("api/v1/", include(api_v1)),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),

@@ -98,6 +98,8 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+# Behind a transaction-mode pooler (PgBouncer, Neon/Supabase poolers) named server-side cursors break; disable them.
+DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = env_bool("DB_DISABLE_SERVER_SIDE_CURSORS", False)
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.User"
@@ -181,6 +183,18 @@ CACHES = {
         "OPTIONS": {"socket_connect_timeout": 1, "socket_timeout": 1, "retry_on_timeout": False},
     }
 }
+
+# Hosts without Redis (e.g. serverless trials) can keep the cache in PostgreSQL: CACHE_BACKEND=database
+# (then run `manage.py createcachetable`). Locks, rate limits and the scheduler heartbeat all work the same way.
+if env("CACHE_BACKEND", "redis") == "database":
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.db.DatabaseCache", "LOCATION": "daywell_cache", "KEY_PREFIX": "daywell"}}
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"  # a DB-backed cache would only double the queries
+
+# --- Scheduler without Celery beat (see apps/core/scheduler.py) ---
+# Token for GET/POST /internal/tick/ (also accepts Vercel's CRON_SECRET). Empty = endpoint disabled (404).
+SCHEDULER_TOKEN = env("SCHEDULER_TOKEN", "") or env("CRON_SECRET", "")
+# Run due periodic jobs from the in-app alarm poll as well. Only for deployments without a Celery beat.
+INLINE_SCHEDULER = env_bool("INLINE_SCHEDULER", False)
 
 # --- Celery ---
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", REDIS_URL)

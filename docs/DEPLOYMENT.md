@@ -34,6 +34,38 @@ load balancer sits in front too. `SECURE_SSL_REDIRECT` defaults on in production
 
 Create an operator account for the Django admin (optional): `docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser`.
 
+## Free trial hosting: Vercel + Neon (showcase deployment)
+
+Live at **https://daywell-three.vercel.app** (Vercel Hobby team `mocode-labs`, project `daywell`; Neon free Postgres
+`daywell-db` in Frankfurt, connected through the Vercel Marketplace). Meant for trials and demos, not production.
+
+How the Docker stack maps onto it:
+
+| Docker stack | Vercel trial |
+|---|---|
+| Caddy + nginx | Vercel edge; `vercel.json` routes `/api`, `/health`, `/internal`, `/django-admin`, `/static` to the `api` service (Django) and everything else to the `web` service (Vite build, SPA fallback); security headers/CSP set in `vercel.json` |
+| gunicorn | Django as one Vercel Function (Python 3.13, region `fra1`); `collectstatic` runs automatically at build |
+| PostgreSQL | Neon via the pooled `DATABASE_URL` (`DB_CONN_MAX_AGE=0`, `DB_DISABLE_SERVER_SIDE_CURSORS=true`) |
+| Redis | none: `CACHE_BACKEND=database` (table `daywell_cache`, created with `createcachetable`) and DB sessions |
+| Celery worker + beat | `apps/core/scheduler.py`: the same periodic jobs run from `GET /internal/tick/` (Bearer `SCHEDULER_TOKEN`) and, with `INLINE_SCHEDULER=true`, from the in-app alarm poll (every 20 s while the app is open). A daily Vercel cron also calls the tick (Hobby crons are daily only) |
+
+**Reminder timing limitation:** while nobody has DayWell open, the only clock is the daily cron, so push notifications to
+closed apps can be hours late. For timely push, point a free external pinger (e.g. cron-job.org) at
+`https://daywell-three.vercel.app/internal/tick/` every minute with the header `Authorization: Bearer <SCHEDULER_TOKEN>`.
+`/health/scheduler/` reports 503 when the clock has stalled for more than 3 minutes.
+
+Other trial limits: email goes to the function log (console backend), so password-reset mails are not delivered; Neon's
+free compute sleeps when idle (first request after a pause is slower); Hobby functions run in one region.
+
+Operations:
+```bash
+vercel deploy --prod                       # from the repo root (linked project)
+vercel env ls production                   # names only; secrets are stored as sensitive
+vercel env pull <file> --environment=production   # DATABASE_URL_UNPOOLED for migrations
+DATABASE_URL=<unpooled url> CACHE_BACKEND=database python manage.py migrate   # run before deploying schema changes
+```
+Demo data was loaded with `manage.py seed_demo` (demo@daywell.test / DayWell-demo-2026 — public demo credentials).
+
 ## Configuration
 All configuration is environment variables — see `.env.example` (documented inline). Production settings
 (`config.settings.prod`) **refuse to start** without a strong `DJANGO_SECRET_KEY` and a `DATABASE_URL`, and enable HSTS,

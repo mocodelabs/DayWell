@@ -17,3 +17,10 @@ frontend/playwright-report/
 backups/
 .ruff_cache/
 frontend/*.tsbuildinfo
+
+# Vercel
+.vercel/
+.env*.local
+
+.vercel
+.env*
