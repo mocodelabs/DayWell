@@ -53,6 +53,10 @@ How the Docker stack maps onto it:
 closed apps can be hours late. For timely push, point a free external pinger (e.g. cron-job.org) at
 `https://daywell-three.vercel.app/internal/tick/` every minute with the header `Authorization: Bearer <SCHEDULER_TOKEN>`.
 `/health/scheduler/` reports 503 when the clock has stalled for more than 3 minutes.
+**Configured 2026-10-15:** a cron-job.org job ("DayWell scheduler", user's account) calls the tick every minute; verified
+by the heartbeat refreshing every ~60 s with no app traffic. Reminders to closed apps therefore fire within about a
+minute of their time. The token lives in Vercel (sensitive) and locally in the git-ignored `.vercel/scheduler-token.txt`;
+to rotate it, update both the Vercel env var (then redeploy) and the cron-job.org header.
 
 Other trial limits: email goes to the function log (console backend), so password-reset mails are not delivered; Neon's
 free compute sleeps when idle (first request after a pause is slower); Hobby functions run in one region.
