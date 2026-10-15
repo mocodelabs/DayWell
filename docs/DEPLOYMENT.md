@@ -59,7 +59,7 @@ free compute sleeps when idle (first request after a pause is slower); Hobby fun
 
 Operations:
 ```bash
-vercel deploy --prod                       # from the repo root (linked project)
+git push                                   # main auto-deploys (GitHub connected); or: vercel deploy --prod
 vercel env ls production                   # names only; secrets are stored as sensitive
 vercel env pull <file> --environment=production   # DATABASE_URL_UNPOOLED for migrations
 DATABASE_URL=<unpooled url> CACHE_BACKEND=database python manage.py migrate   # run before deploying schema changes

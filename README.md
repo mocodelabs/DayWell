@@ -3,6 +3,9 @@
 A calm personal companion for plans, reminders and healthy routines: tasks, calendar, alarms, a warm morning briefing,
 habits, reading, fitness, affirmations, hydration, sleep, journaling and honest insights — in one installable web app.
 
+**Live trial:** https://daywell-three.vercel.app (demo login demo@daywell.test / DayWell-demo-2026). Pushes to `main`
+deploy automatically via Vercel; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#free-trial-hosting-vercel--neon-showcase-deployment).
+
 - **Backend:** Django 5.2 + DRF, PostgreSQL 17, Redis, Celery worker + beat (`backend/`)
 - **Frontend:** React 19 + TypeScript (strict), Vite, Tailwind v4, TanStack Query, React Hook Form + Zod, Radix, FullCalendar, PWA (`frontend/`)
 
