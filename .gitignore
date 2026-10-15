@@ -24,3 +24,8 @@ frontend/*.tsbuildinfo
 
 .vercel
 .env*
+
+# Agent tooling installed by integrations
+.agents/
+.claude/
+skills-lock.json
