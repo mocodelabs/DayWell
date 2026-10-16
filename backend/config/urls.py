@@ -8,7 +8,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.core import health, scheduler
 
-API_APPS = ["accounts", "preferences", "tasks", "events", "reminders", "habits", "affirmations", "reading", "fitness", "wellness", "insights", "briefing"]
+API_APPS = ["accounts", "preferences", "tasks", "events", "reminders", "habits", "affirmations", "reading", "fitness", "wellness", "insights", "briefing", "billing"]
 
 api_v1 = [path("", include(f"apps.{name}.urls")) for name in API_APPS if Path(settings.BASE_DIR, "apps", name, "urls.py").exists()]
 

@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "apps.wellness",
     "apps.insights",
     "apps.briefing",
+    "apps.billing",
 ]
 
 MIDDLEWARE = [
@@ -142,7 +143,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["apps.accounts.authentication.SessionAuthentication"],
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated", "apps.billing.permissions.PremiumOrReadOnly"],
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
@@ -196,6 +197,11 @@ SCHEDULER_TOKEN = env("SCHEDULER_TOKEN", "") or env("CRON_SECRET", "")
 # Run due periodic jobs from the in-app alarm poll as well. Only for deployments without a Celery beat.
 INLINE_SCHEDULER = env_bool("INLINE_SCHEDULER", False)
 
+# --- Billing (Paystack). Payments are disabled until the secret key is set; trials and read-only mode still apply. ---
+PAYSTACK_SECRET_KEY = env("PAYSTACK_SECRET_KEY", "")
+BILLING_TRIAL_DAYS = int(env("BILLING_TRIAL_DAYS", "14"))
+BILLING_RENEWAL_GRACE_DAYS = int(env("BILLING_RENEWAL_GRACE_DAYS", "3"))
+
 # --- Celery ---
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", REDIS_URL)
 CELERY_RESULT_BACKEND = None
@@ -217,6 +223,7 @@ CELERY_BEAT_SCHEDULE = {
     # Operational: report scheduler lag and clean expired data.
     "scheduler-heartbeat": {"task": "reminders.heartbeat", "schedule": timedelta(minutes=1)},
     "cleanup": {"task": "core.cleanup", "schedule": crontab(hour=3, minute=17)},
+    "sync-billing-plans": {"task": "billing.sync_plans", "schedule": timedelta(hours=1)},
 }
 
 # --- Reminder engine tuning (see docs/NOTIFICATIONS_AND_ALARMS.md) ---

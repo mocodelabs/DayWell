@@ -86,6 +86,8 @@ class AuditEvent(models.Model):
         ACCOUNT_DELETED = "account_deleted"
         PUSH_SUBSCRIBED = "push_subscribed"
         PUSH_UNSUBSCRIBED = "push_unsubscribed"
+        BILLING_PAYMENT = "billing_payment"
+        BILLING_RENEWAL_CANCELLED = "billing_renewal_cancelled"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="audit_events")
     kind = models.CharField(max_length=40, choices=Kind.choices)

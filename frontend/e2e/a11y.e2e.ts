@@ -63,7 +63,7 @@ test("skip link is the first tab stop and moves focus to main content", async ()
 
 const PAGES = ["/", "/tasks", "/tasks?view=matrix", "/calendar", "/habits", "/growth/reading", "/growth/fitness", "/growth/affirmations",
   "/growth/hydration", "/growth/sleep", "/growth/journal", "/growth/mindfulness", "/insights", "/notifications", "/reminders",
-  "/settings/profile", "/settings/rhythm", "/settings/notifications", "/settings/modules", "/settings/dashboard", "/settings/appearance", "/settings/privacy"];
+  "/settings/profile", "/settings/rhythm", "/settings/notifications", "/settings/modules", "/settings/dashboard", "/settings/appearance", "/settings/privacy", "/settings/billing"];
 
 for (const path of PAGES) {
   test(`page ${path} has no serious axe violations`, async () => {

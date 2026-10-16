@@ -5,6 +5,7 @@ habits, reading, fitness, affirmations, hydration, sleep, journaling and honest 
 
 **Live trial:** https://daywell-three.vercel.app (demo login demo@daywell.test / DayWell-demo-2026). Pushes to `main`
 deploy automatically via Vercel; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#free-trial-hosting-vercel--neon-showcase-deployment).
+Premium is sold monthly/annually through Paystack (cards + M-Pesa) after a 14-day trial — see [docs/BILLING.md](docs/BILLING.md).
 
 - **Backend:** Django 5.2 + DRF, PostgreSQL 17, Redis, Celery worker + beat (`backend/`)
 - **Frontend:** React 19 + TypeScript (strict), Vite, Tailwind v4, TanStack Query, React Hook Form + Zod, Radix, FullCalendar, PWA (`frontend/`)

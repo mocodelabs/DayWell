@@ -1,11 +1,12 @@
 import clsx from "clsx";
 import {
-  BarChart3, Bell, CalendarDays, CheckSquare, ChevronsLeft, ChevronsRight, CloudOff, Ellipsis, Leaf, Plus, Settings, Sprout, Sun, TriangleAlert, type LucideIcon,
+  BarChart3, Bell, CalendarDays, CheckSquare, ChevronsLeft, ChevronsRight, CloudOff, Ellipsis, Leaf, Lock, Plus, Settings, Sparkles, Sprout, Sun, TriangleAlert, type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useDashboard, useUnreadCount } from "@/hooks/queries";
 import { useSession } from "@/features/auth/session";
+import { daysUntil, useBilling } from "@/features/billing/billing";
 import { Dialog } from "../ui/Dialog";
 import { UpNextPanel } from "./UpNextPanel";
 import { useQuickAdd } from "./QuickAddContext";
@@ -113,6 +114,7 @@ export function AppShell() {
             <CloudOff className="h-4 w-4" aria-hidden /> You're offline. You can browse what's loaded; changes need a connection. In-app alarms can't be checked until you reconnect.
           </div>
         )}
+        <BillingBanner />
         {missedCount > 0 && location.pathname !== "/notifications" && (
           <Link to="/notifications?tab=missed" className="flex items-center gap-2 bg-terracotta-soft px-4 py-2 text-sm hover:underline">
             <TriangleAlert className="h-4 w-4" aria-hidden /> {missedCount} reminder{missedCount === 1 ? "" : "s"} need{missedCount === 1 ? "s" : ""} your attention. Review them →
@@ -173,4 +175,28 @@ function SideLink({ item, collapsed, badge }: { item: NavItem; collapsed: boolea
       {!!badge && <span className={clsx("ml-auto rounded-full bg-terracotta px-1.5 text-xs text-on-primary", collapsed && "absolute top-1 right-1")}><span className="sr-only">, unread: </span>{badge}</span>}
     </NavLink>
   );
+}
+
+/** Trial ending soon or read-only mode: one calm line linking to Plan & billing (hidden on that page itself). */
+function BillingBanner() {
+  const billing = useBilling();
+  const location = useLocation();
+  const data = billing.data;
+  if (!data || location.pathname.startsWith("/settings/billing")) return null;
+  const left = daysUntil(data.trial_ends_at);
+  if (data.state === "read_only") {
+    return (
+      <Link to="/settings/billing" className="flex items-center gap-2 bg-amber-soft px-4 py-2 text-sm hover:underline">
+        <Lock className="h-4 w-4" aria-hidden /> Your free trial has ended, so DayWell is read-only. Your data is safe — subscribe to keep planning →
+      </Link>
+    );
+  }
+  if (data.state === "trial" && left <= 3) {
+    return (
+      <Link to="/settings/billing" className="flex items-center gap-2 bg-sage-soft px-4 py-2 text-sm hover:underline">
+        <Sparkles className="h-4 w-4" aria-hidden /> {left === 0 ? "Your free trial ends today." : `${left} day${left === 1 ? "" : "s"} left in your free trial.`} Choose a plan to keep everything unlocked →
+      </Link>
+    );
+  }
+  return null;
 }

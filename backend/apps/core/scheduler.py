@@ -26,6 +26,7 @@ JOBS: list[tuple[str, timedelta, str]] = [
     ("dispatch-due-reminders", timedelta(seconds=25), "apps.reminders.tasks.dispatch_due"),
     ("scheduler-heartbeat", timedelta(seconds=55), "apps.reminders.tasks.heartbeat"),
     ("cleanup", timedelta(hours=24), "apps.core.tasks.cleanup"),
+    ("sync-billing-plans", timedelta(hours=1), "apps.billing.tasks.sync_plans"),
 ]
 
 

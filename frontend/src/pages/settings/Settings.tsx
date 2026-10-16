@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Bell, Eye, LayoutDashboard, Puzzle, Shield, Sun, User } from "lucide-react";
+import { Bell, CreditCard, Eye, LayoutDashboard, Puzzle, Shield, Sun, User } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { LoadingList, PageHeader } from "@/components/ui/feedback";
@@ -11,6 +11,7 @@ const DashboardLayout = lazy(() => import("./DashboardLayout"));
 const NotificationSettings = lazy(() => import("./NotificationSettings"));
 const Appearance = lazy(() => import("./Appearance"));
 const Privacy = lazy(() => import("./Privacy"));
+const Billing = lazy(() => import("./Billing"));
 
 const SECTIONS = [
   { path: "profile", label: "Profile & region", icon: User, el: <Profile /> },
@@ -20,6 +21,7 @@ const SECTIONS = [
   { path: "dashboard", label: "Today page", icon: LayoutDashboard, el: <DashboardLayout /> },
   { path: "appearance", label: "Appearance & accessibility", icon: Eye, el: <Appearance /> },
   { path: "privacy", label: "Privacy & security", icon: Shield, el: <Privacy /> },
+  { path: "billing", label: "Plan & billing", icon: CreditCard, el: <Billing /> },
 ];
 
 export default function Settings() {

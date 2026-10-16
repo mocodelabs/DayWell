@@ -97,4 +97,10 @@ class Command(BaseCommand):
         for d in (2, 4, 7):
             WorkoutSession.objects.create(owner=user, routine=routine, date=today - timedelta(days=d), duration_minutes=40 + d, workout_type="Gym")
 
+        # The shared demo must never fall into read-only mode.
+        from apps.billing.services import account_for
+
+        acct = account_for(user)
+        acct.complimentary = True
+        acct.save(update_fields=["complimentary", "updated_at"])
         self.stdout.write(self.style.SUCCESS(f"Demo account ready: {opts['email']} (time zone {prefs.time_zone})."))
