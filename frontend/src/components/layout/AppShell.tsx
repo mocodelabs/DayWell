@@ -99,15 +99,20 @@ export function AppShell() {
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Mobile top bar */}
         <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-bg/95 px-4 py-2.5 backdrop-blur lg:hidden">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex shrink-0 items-center gap-2">
             <img src="/icons/icon-192.png" alt="" className="h-7 w-7 rounded-lg" />
             <span className="font-[family-name:var(--font-display)] text-lg font-semibold text-primary-strong">DayWell</span>
           </Link>
-          <Link to="/notifications" className="relative rounded-full p-2 hover:bg-sage-soft" aria-label={`Notifications${unread.data?.count ? `, ${unread.data.count} unread` : ""}`}>
-            <Bell className="h-5 w-5" aria-hidden />
-            {!!unread.data?.count && <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-terracotta" aria-hidden />}
-          </Link>
+          <div className="flex items-center gap-1">
+            <TrialBadge />
+            <Link to="/notifications" className="relative rounded-full p-2 hover:bg-sage-soft" aria-label={`Notifications${unread.data?.count ? `, ${unread.data.count} unread` : ""}`}>
+              <Bell className="h-5 w-5" aria-hidden />
+              {!!unread.data?.count && <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-terracotta" aria-hidden />}
+            </Link>
+          </div>
         </header>
+        {/* Desktop: the same badge in the top-right corner (its own row, so it never covers banners or page content) */}
+        <TrialBadge placement="desktop" />
 
         {!online && (
           <div role="status" className="flex items-center gap-2 bg-amber-soft px-4 py-2 text-sm">
@@ -199,4 +204,20 @@ function BillingBanner() {
     );
   }
   return null;
+}
+
+/** Small "Trial · N days" countdown pill shown only during the free trial; links to Plan & billing. */
+function TrialBadge({ placement = "mobile" }: { placement?: "mobile" | "desktop" }) {
+  const billing = useBilling();
+  if (billing.data?.state !== "trial") return null;
+  const left = daysUntil(billing.data.trial_ends_at);
+  const badge = (
+    <Link to="/settings/billing" aria-label={`Free trial: ${left === 0 ? "ends today" : `${left} day${left === 1 ? "" : "s"} left`}. View plans`}
+      className={clsx("inline-flex min-h-8 items-center gap-1 rounded-full border px-2.5 text-xs font-semibold whitespace-nowrap hover:opacity-90",
+        left <= 3 ? "border-terracotta bg-terracotta-soft text-ink" : "border-line bg-surface text-primary-strong")}>
+      <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
+      <span aria-hidden><span className="hidden min-[400px]:inline lg:inline">Trial · </span>{left === 0 ? "ends today" : <>{left}<span className="hidden min-[400px]:inline lg:inline"> day{left === 1 ? "" : "s"}</span><span className="min-[400px]:hidden lg:hidden">d</span></>}</span>
+    </Link>
+  );
+  return placement === "desktop" ? <div className="hidden justify-end px-4 pt-3 lg:flex">{badge}</div> : badge;
 }
