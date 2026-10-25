@@ -1,3 +1,5 @@
+import time
+
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout, password_validation, update_session_auth_hash
 from django.contrib.auth.tokens import default_token_generator
@@ -146,11 +148,14 @@ class PasswordResetRequestView(APIView):
     def post(self, request):
         ser = PasswordResetRequestSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
+        started = time.monotonic()
         user = User.objects.filter(email__iexact=ser.validated_data["email"].strip(), is_active=True).first()
         if user is not None:
             services.send_password_reset_email(user)
             services.audit(AuditEvent.Kind.PASSWORD_RESET_REQUESTED, request, user=user)
-        # Same answer whether or not the account exists (no account enumeration).
+        # Same answer, and roughly the same response time (sending mail takes a second or two), whether or not the account
+        # exists — so neither the message nor the timing tells anyone which emails have accounts.
+        time.sleep(max(0.0, settings.PASSWORD_RESET_MIN_RESPONSE_SECONDS - (time.monotonic() - started)))
         return Response({"ok": True, "message": "If an account exists for that email, a reset link is on its way."})
 
 

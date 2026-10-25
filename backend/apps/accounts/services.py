@@ -8,10 +8,11 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator, default_token_generator
 from django.core.cache import cache
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
 from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
+from django.utils.html import escape
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework.throttling import BaseThrottle
 
@@ -115,24 +116,60 @@ def user_from_uid(uid: str) -> User | None:
         return None
 
 
-def send_verification_email(user: User) -> None:
+def _send_email(user: User, *, kind: str, subject: str, intro: str, button: str, link: str, footer: str) -> bool:
+    """Send a plain-text + HTML email. Never raises: a mail outage must not break the request or reveal anything.
+
+    Logs contain the kind and user id only — never the address, the link or its token.
+    """
+    name = user.display_name or "there"
+    text = f"Hi {name},\n\n{intro}\n\n{button}: {link}\n\n{footer}\n\n— DayWell"
+    html = f"""<!doctype html><html><body style="margin:0;background:#f7f4ee;font-family:Arial,Helvetica,sans-serif;color:#2b2f2a">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:16px;padding:28px">
+<tr><td style="font-size:20px;font-weight:bold;color:#3f6b4f;padding-bottom:16px">DayWell</td></tr>
+<tr><td style="font-size:15px;line-height:1.5;padding-bottom:20px">Hi {escape(name)},<br><br>{escape(intro)}</td></tr>
+<tr><td style="padding-bottom:20px"><a href="{escape(link)}"
+ style="display:inline-block;background:#3f6b4f;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:10px">
+{escape(button)}</a></td></tr>
+<tr><td style="font-size:13px;line-height:1.5;color:#5f655c">{escape(footer)}<br><br>
+If the button doesn't work, copy this link into your browser:<br><span style="word-break:break-all">{escape(link)}</span></td></tr>
+</table></td></tr></table></body></html>"""
+    message = EmailMultiAlternatives(subject, text, settings.DEFAULT_FROM_EMAIL, [user.email])
+    message.attach_alternative(html, "text/html")
+    try:
+        message.send()
+    except Exception as exc:  # SMTP down, bad credentials, timeout…
+        logger.error("email not sent", extra={"kind": kind, "user_id": user.pk, "error": exc.__class__.__name__})
+        return False
+    logger.info("email sent", extra={"kind": kind, "user_id": user.pk})
+    return True
+
+
+def send_verification_email(user: User) -> bool:
     link = f"{settings.FRONTEND_URL}/verify-email?uid={uid_for(user)}&token={email_verification_token.make_token(user)}"
-    send_mail(
-        "Confirm your DayWell email",
-        f"Hi{(' ' + user.display_name) if user.display_name else ''},\n\nPlease confirm your email address:\n{link}\n\nIf you didn't create a DayWell account you can ignore this message.",
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
+    return _send_email(
+        user,
+        kind="verify_email",
+        subject="Confirm your DayWell email",
+        intro="Please confirm the email address for your DayWell account.",
+        button="Confirm my email",
+        link=link,
+        footer="If you didn't create a DayWell account, you can ignore this message.",
     )
 
 
-def send_password_reset_email(user: User) -> None:
+def send_password_reset_email(user: User) -> bool:
     link = f"{settings.FRONTEND_URL}/reset-password?uid={uid_for(user)}&token={default_token_generator.make_token(user)}"
-    send_mail(
-        "Reset your DayWell password",
-        f"Someone (hopefully you) asked to reset your DayWell password.\n\nChoose a new password here:\n{link}\n\n"
-        "This link expires in a few days. If you didn't ask for it, you can ignore this email — your password won't change.",
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
+    minutes = settings.PASSWORD_RESET_TIMEOUT // 60
+    lifetime = f"{minutes // 60} hour{'s' if minutes >= 120 else ''}" if minutes >= 60 else f"{minutes} minutes"
+    return _send_email(
+        user,
+        kind="password_reset",
+        subject="Reset your DayWell password",
+        intro="Someone (hopefully you) asked to reset your DayWell password. Choose a new one with the button below.",
+        button="Choose a new password",
+        link=link,
+        footer=f"This link works once and expires in {lifetime}. If you didn't ask for it, ignore this email — your password won't change.",
     )
 
 

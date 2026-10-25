@@ -150,3 +150,41 @@ def test_revoked_session_stops_working_with_cached_sessions(user, settings):
     other = next(s for s in a.get("/api/v1/auth/sessions/").json() if not s["current"])
     assert a.delete(f"/api/v1/auth/sessions/{other['session_key']}/").status_code == 204
     assert b.get("/api/v1/auth/me/").status_code == 401
+
+
+class TestResetEmailDelivery:
+    """The reset email is a real multipart email with a working, expiring link; delivery failures stay invisible."""
+
+    def test_reset_email_has_html_button_and_working_link(self, anon, user, settings):
+        from django.core import mail
+
+        settings.FRONTEND_URL = "https://daywell.example"
+        anon.post("/api/v1/auth/password/reset/", {"email": "ADA@example.com"})
+        assert len(mail.outbox) == 1
+        msg = mail.outbox[0]
+        assert msg.to == ["ada@example.com"] and msg.subject == "Reset your DayWell password"
+        html, mimetype = msg.alternatives[0]
+        assert mimetype == "text/html" and "Choose a new password" in html
+        assert "expires in 1 hour" in msg.body
+        link = next(w for w in msg.body.split() if w.startswith("https://daywell.example/reset-password?"))
+        from urllib.parse import parse_qs, urlparse
+
+        q = parse_qs(urlparse(link).query)
+        res = anon.post("/api/v1/auth/password/reset/confirm/", {"uid": q["uid"][0], "token": q["token"][0], "new_password": STRONG})
+        assert res.status_code == 200
+
+    def test_mail_outage_still_gives_the_generic_answer(self, anon, user, caplog):
+        from unittest import mock
+
+        with mock.patch("django.core.mail.EmailMultiAlternatives.send", side_effect=OSError("smtp down")):
+            res = anon.post("/api/v1/auth/password/reset/", {"email": "ada@example.com"})
+        assert res.status_code == 200 and "If an account exists" in res.json()["message"]
+        assert "email not sent" in caplog.text and "ada@example.com" not in caplog.text
+
+    def test_unknown_and_known_emails_take_the_same_minimum_time(self, anon, user, settings):
+        import time
+
+        settings.PASSWORD_RESET_MIN_RESPONSE_SECONDS = 0.3
+        t = time.monotonic()
+        anon.post("/api/v1/auth/password/reset/", {"email": "ghost@example.com"})
+        assert time.monotonic() - t >= 0.3

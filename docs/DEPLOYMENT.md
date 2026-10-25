@@ -58,7 +58,9 @@ by the heartbeat refreshing every ~60 s with no app traffic. Reminders to closed
 minute of their time. The token lives in Vercel (sensitive) and locally in the git-ignored `.vercel/scheduler-token.txt`;
 to rotate it, update both the Vercel env var (then redeploy) and the cron-job.org header.
 
-Other trial limits: email goes to the function log (console backend), so password-reset mails are not delivered; Neon's
+Email (password reset, email verification) is sent through **Gmail SMTP** (`smtp.gmail.com:587`, TLS) with a Gmail app
+password in `EMAIL_HOST_PASSWORD`; Gmail allows roughly 500 messages/day and mail comes from that Gmail address. Send failures
+are logged (`email not sent`, user id only) and never change the response. Other trial limits: Neon's
 free compute sleeps when idle (first request after a pause is slower); Hobby functions run in one region.
 
 Operations:

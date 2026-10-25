@@ -248,6 +248,9 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", False)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "DayWell <no-reply@localhost>")
+EMAIL_TIMEOUT = int(env("EMAIL_TIMEOUT", "10"))  # seconds; a slow mail server must not hang the request
+PASSWORD_RESET_TIMEOUT = int(env("PASSWORD_RESET_TIMEOUT", "3600"))  # reset links expire after 1 hour
+PASSWORD_RESET_MIN_RESPONSE_SECONDS = float(env("PASSWORD_RESET_MIN_RESPONSE_SECONDS", "2.5"))
 FRONTEND_URL = env("FRONTEND_URL", "http://localhost:5193")
 REQUIRE_EMAIL_VERIFICATION = env_bool("REQUIRE_EMAIL_VERIFICATION", False)
 
