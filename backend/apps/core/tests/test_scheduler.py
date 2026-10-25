@@ -78,3 +78,24 @@ class TestInlineScheduler:
             api.get("/api/v1/alarms/active/")
         occ.refresh_from_db()
         assert occ.status == OccurrenceStatus.SCHEDULED
+
+
+class TestEmailCheck:
+    def test_protected_like_the_tick(self, anon, settings):
+        settings.SCHEDULER_TOKEN = ""
+        assert anon.get("/internal/email-check/").status_code == 404
+        settings.SCHEDULER_TOKEN = TOKEN
+        assert anon.get("/internal/email-check/").status_code == 403
+
+    def test_reports_the_failing_step_without_credentials(self, anon, settings):
+        import smtplib
+        from unittest import mock
+
+        settings.SCHEDULER_TOKEN = TOKEN
+        settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD, settings.EMAIL_USE_TLS = "me@example.com", "app-pass", True
+        conn = mock.MagicMock()
+        conn.login.side_effect = smtplib.SMTPAuthenticationError(535, b"Username and Password not accepted")
+        with mock.patch("smtplib.SMTP", return_value=conn):
+            body = anon.get("/internal/email-check/", HTTP_AUTHORIZATION=f"Bearer {TOKEN}").json()
+        assert body["ok"] is False and body["failed_step"] == "login" and "535" in body["detail"]
+        assert "app-pass" not in str(body) and body["password_set"] is True

@@ -72,3 +72,34 @@ def tick(request):
     if not hmac.compare_digest(supplied.encode(), token.encode()):
         return JsonResponse({"detail": "forbidden"}, status=403)
     return JsonResponse({"ran": run_due_jobs()}, json_dumps_params={"default": str})
+
+
+@csrf_exempt
+def email_check(request):
+    """``GET /internal/email-check/`` (same Bearer token as the tick): connect, STARTTLS and log in to the SMTP server
+    without sending anything, and report the first step that fails. Never returns credentials."""
+    import smtplib
+    import ssl
+
+    token = settings.SCHEDULER_TOKEN
+    if not token or request.method != "GET":
+        raise Http404
+    supplied = request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
+    if not hmac.compare_digest(supplied.encode(), token.encode()):
+        return JsonResponse({"detail": "forbidden"}, status=403)
+    report = {"backend": settings.EMAIL_BACKEND.rsplit(".", 2)[-2], "host": settings.EMAIL_HOST, "port": settings.EMAIL_PORT,
+              "tls": settings.EMAIL_USE_TLS, "user_set": bool(settings.EMAIL_HOST_USER), "password_set": bool(settings.EMAIL_HOST_PASSWORD),
+              "from_matches_user": settings.EMAIL_HOST_USER.lower() in settings.DEFAULT_FROM_EMAIL.lower() if settings.EMAIL_HOST_USER else False}
+    step = "connect"
+    try:
+        conn = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=settings.EMAIL_TIMEOUT)
+        if settings.EMAIL_USE_TLS:
+            step = "starttls"
+            conn.starttls(context=ssl.create_default_context())
+        step = "login"
+        conn.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+        conn.quit()
+        report.update(ok=True)
+    except Exception as exc:
+        report.update(ok=False, failed_step=step, error=exc.__class__.__name__, detail=str(exc)[:200])
+    return JsonResponse(report)

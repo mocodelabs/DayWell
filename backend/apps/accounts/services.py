@@ -139,7 +139,8 @@ If the button doesn't work, copy this link into your browser:<br><span style="wo
     try:
         message.send()
     except Exception as exc:  # SMTP down, bad credentials, timeout…
-        logger.error("email not sent", extra={"kind": kind, "user_id": user.pk, "error": exc.__class__.__name__})
+        # SMTP replies ("535 Username and Password not accepted"…) never contain the password; keep them for diagnosis.
+        logger.error("email not sent", extra={"kind": kind, "user_id": user.pk, "error": exc.__class__.__name__, "detail": str(exc)[:200]})
         return False
     logger.info("email sent", extra={"kind": kind, "user_id": user.pk})
     return True
