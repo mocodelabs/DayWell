@@ -1,5 +1,5 @@
 Django>=5.2,<5.3
-djangorestframework>=3.17.2,<3.18
+djangorestframework>=3.18.2,<3.19
 django-cors-headers>=4.9,<5
 django-filter>=25.1,<26
 dj-database-url>=2.3,<4
