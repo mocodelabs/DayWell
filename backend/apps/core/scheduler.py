@@ -89,6 +89,7 @@ def email_check(request):
         return JsonResponse({"detail": "forbidden"}, status=403)
     report = {"backend": settings.EMAIL_BACKEND.rsplit(".", 2)[-2], "host": settings.EMAIL_HOST, "port": settings.EMAIL_PORT,
               "tls": settings.EMAIL_USE_TLS, "user_set": bool(settings.EMAIL_HOST_USER), "password_set": bool(settings.EMAIL_HOST_PASSWORD),
+              "password_looks_like_app_password": len(settings.EMAIL_HOST_PASSWORD) == 16 and settings.EMAIL_HOST_PASSWORD.isalpha(),
               "from_matches_user": settings.EMAIL_HOST_USER.lower() in settings.DEFAULT_FROM_EMAIL.lower() if settings.EMAIL_HOST_USER else False}
     step = "connect"
     try:
