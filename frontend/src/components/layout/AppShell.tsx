@@ -1,11 +1,11 @@
 import clsx from "clsx";
 import {
-  BarChart3, Bell, CalendarDays, CheckSquare, ChevronsLeft, ChevronsRight, CloudOff, Ellipsis, Leaf, Lock, Plus, Settings, Sparkles, Sprout, Sun, TriangleAlert, type LucideIcon,
+  BarChart3, Bell, CalendarDays, CheckSquare, ChevronsLeft, ChevronsRight, CloudOff, Ellipsis, Leaf, Lock, LogOut, Plus, Settings, Sparkles, Sprout, Sun, TriangleAlert, type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useDashboard, useUnreadCount } from "@/hooks/queries";
-import { useSession } from "@/features/auth/session";
+import { useSession, useSignOut } from "@/features/auth/session";
 import { daysUntil, useBilling } from "@/features/billing/billing";
 import { Dialog } from "../ui/Dialog";
 import { UpNextPanel } from "./UpNextPanel";
@@ -45,7 +45,8 @@ function useOnline() {
 }
 
 export function AppShell() {
-  const { prefs } = useSession();
+  const { prefs, user } = useSession();
+  const signOut = useSignOut();
   const { openQuickAdd } = useQuickAdd();
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -91,7 +92,12 @@ export function AppShell() {
           {NAV.map((item) => <SideLink key={item.to} item={item} collapsed={collapsed} />)}
           <SideLink item={{ to: "/notifications", label: "Notifications", icon: Bell }} collapsed={collapsed} badge={unread.data?.count} />
         </nav>
-        <button onClick={toggle} className="m-3 flex items-center justify-center gap-2 rounded-lg p-2 text-sm text-muted hover:bg-sage-soft" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
+        <button onClick={() => void signOut()} aria-label={`Log out of ${user.display_name || user.email}`} title={collapsed ? "Log out" : undefined}
+          className={clsx("mx-2 mt-2 flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted hover:bg-sage-soft hover:text-ink", collapsed && "justify-center px-0")}>
+          <LogOut className="h-5 w-5 shrink-0" aria-hidden />
+          {!collapsed && "Log out"}
+        </button>
+        <button onClick={toggle} className="m-3 mt-1 flex items-center justify-center gap-2 rounded-lg p-2 text-sm text-muted hover:bg-sage-soft" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
           {collapsed ? <ChevronsRight className="h-4 w-4" aria-hidden /> : <><ChevronsLeft className="h-4 w-4" aria-hidden /> Collapse</>}
         </button>
       </aside>
@@ -162,6 +168,13 @@ export function AppShell() {
             </NavLink>
           ))}
         </nav>
+        <div className="mt-4 border-t border-line pt-3">
+          <p className="mb-2 truncate text-sm text-muted">Signed in as {user.display_name || user.email}</p>
+          <button onClick={() => { setMoreOpen(false); void signOut(); }}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-line p-3 text-sm font-medium hover:bg-sage-soft">
+            <LogOut className="h-5 w-5" aria-hidden /> Log out
+          </button>
+        </div>
       </Dialog>
     </div>
   );

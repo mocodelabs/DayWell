@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, type ReactNode } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { ApiError, setUnauthorizedHandler } from "@/lib/api";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { api, ApiError, setUnauthorizedHandler } from "@/lib/api";
 import type { Me, Preferences, User } from "@/lib/types";
 import { keys, useMe } from "@/hooks/queries";
 
@@ -80,4 +80,16 @@ export function GuestOnly({ children }: { children: ReactNode }) {
   if (me.isPending) return null;
   if (me.data) return <Navigate to="/" replace />;
   return <>{children}</>;
+}
+
+/** Signs out on the server, drops every cached query (no data from this account lingers), and goes to sign-in. */
+export function useSignOut() {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  return async () => {
+    await api.post("/auth/logout/").catch(() => undefined); // even if the request fails, leave the device signed out locally
+    qc.clear();
+    qc.setQueryData(keys.me, null);
+    navigate("/login", { replace: true });
+  };
 }

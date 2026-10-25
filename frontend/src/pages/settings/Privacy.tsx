@@ -7,7 +7,7 @@ import { ConfirmDialog } from "@/components/ui/Dialog";
 import { Card, CardHeader } from "@/components/ui/feedback";
 import { Field, FormError, Input, Switch } from "@/components/ui/form";
 import { useToast } from "@/components/ui/Toast";
-import { useSession } from "@/features/auth/session";
+import { useSession, useSignOut } from "@/features/auth/session";
 import { keys } from "@/hooks/queries";
 import { api, ApiError } from "@/lib/api";
 import { formatDateTime } from "@/lib/datetime";
@@ -28,12 +28,7 @@ export default function Privacy() {
   const [del, setDel] = useState({ password: "", confirm: "" });
   const [delError, setDelError] = useState("");
 
-  const logout = async () => {
-    await api.post("/auth/logout/").catch(() => undefined);
-    qc.clear();
-    qc.setQueryData(keys.me, null);
-    navigate("/login", { replace: true });
-  };
+  const logout = useSignOut();
   const changePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPwError("");

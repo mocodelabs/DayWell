@@ -203,6 +203,27 @@ describe("Navigation & notification permission", () => {
     expect(screen.getByRole("link", { name: "Skip to content" })).toHaveAttribute("href", "#main");
   });
 
+  it("logs out from the More menu: server sign-out, then back to sign-in", async () => {
+    const { AppShell } = await import("@/components/layout/AppShell");
+    const { QuickAddProvider } = await import("@/components/layout/QuickAddContext");
+    const { calls } = mockApi({
+      "GET /api/v1/dashboard/today/": dashboard, "GET /api/v1/notifications/unread-count/": { count: 0 }, "GET /api/v1/categories/": [],
+      "POST /api/v1/auth/logout/": undefined,
+    });
+    renderApp(
+      <Routes>
+        <Route element={<QuickAddProvider><AppShell /></QuickAddProvider>}><Route index element={<p>home</p>} /></Route>
+        <Route path="/login" element={<p>sign-in page</p>} />
+      </Routes>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "More" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/Signed in as Ada/)).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole("button", { name: "Log out" }));
+    expect(await screen.findByText("sign-in page")).toBeInTheDocument();
+    expect(calls.some((c) => c.method === "POST" && c.url.endsWith("/auth/logout/"))).toBe(true);
+  });
+
   it("reports denied notification permission honestly", async () => {
     vi.stubGlobal("Notification", Object.assign(function Notification() {}, { permission: "denied", requestPermission: vi.fn() }));
     const { pushSupport, subscribeToPush } = await import("@/lib/push");
