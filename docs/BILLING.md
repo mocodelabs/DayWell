@@ -55,6 +55,16 @@ The user can turn off automatic renewal in **Settings → Plan & billing**; acce
 6. Test with Paystack's test cards / test M-Pesa number, then switch to **Live** keys (repeat steps 2–3 with the live
    key and live webhook) after Paystack activates your business.
 
+### Switching keys (test ↔ live) — order matters
+Plan codes belong to one mode, and the running deployment keeps using the old key until a redeploy (the every-minute
+pinger can sync plans with it in the meantime). So: (1) replace `PAYSTACK_SECRET_KEY` in Vercel, (2) **redeploy and wait
+until it is live**, (3) only then clear `Plan.paystack_plan_code` and the `sched:sync-billing-plans` cache key, (4) call the
+tick and confirm in the logs that the *new* deployment id logged "paystack plans synced". Also clear stored
+`paystack_customer_code` / `paystack_subscription_code` / `paystack_email_token` on accounts (they belong to the old mode).
+
+**Live since 2026-10-25** (KES + USD accepted). The account used for the test-mode payments is kept as a complimentary
+showcase account with its test payment history.
+
 ## Not included (yet)
 Receipts/invoices by email (email isn't configured on the trial host), proration when switching monthly↔annual (a new
 period simply stacks onto the old one), refunds (do them in the Paystack dashboard; access isn't revoked automatically),
