@@ -244,8 +244,10 @@ WEB_PUSH_TTL = int(env("WEB_PUSH_TTL", "900"))
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = env("EMAIL_HOST", "localhost")
 EMAIL_PORT = int(env("EMAIL_PORT", "25"))
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
+# Trim pasted credentials: a stray newline/space (e.g. from a shell pipe) makes the SMTP login fail. Gmail app passwords
+# are shown in groups of four; the spaces are not part of the password.
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", "").strip()
+EMAIL_HOST_PASSWORD = "".join(env("EMAIL_HOST_PASSWORD", "").split())
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", False)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "DayWell <no-reply@localhost>")
 EMAIL_TIMEOUT = int(env("EMAIL_TIMEOUT", "10"))  # seconds; a slow mail server must not hang the request
