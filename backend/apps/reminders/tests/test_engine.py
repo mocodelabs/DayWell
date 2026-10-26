@@ -326,3 +326,11 @@ class TestSnoozeAudioRegression:
         assert ReminderOccurrence.objects.filter(reminder=r, audio_played_at__isnull=False).count() == 0
         assert [o.status for o in ReminderOccurrence.objects.filter(reminder=r).order_by("id")] == ["snoozed", "snoozed", "scheduled"]
         assert grandchild.snooze_count == 2 and grandchild.parent_id == child.id
+
+
+class TestDiagnosticsDevices:
+    def test_lists_which_devices_get_alarms_while_closed(self, api, user):
+        store_subscription(user, "https://push.example/a", "p", "a", label="Chrome on Windows")
+        body = api.get("/api/v1/alarms/diagnostics/").json()
+        assert body["subscriptions"]["active"] == 1
+        assert [d["label"] for d in body["subscriptions"]["devices"]] == ["Chrome on Windows"]

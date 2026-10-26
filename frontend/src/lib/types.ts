@@ -287,7 +287,7 @@ export interface Diagnostics {
   time_zone: string;
   local_time: string;
   push_configured: boolean;
-  subscriptions: { active: number; inactive: number };
+  subscriptions: { active: number; inactive: number; devices: { label: string; last_success_at: string | null }[] };
   scheduler: { heartbeat_at: string | null; healthy: boolean; lag_seconds: number };
   quiet_hours_active: boolean;
   last_push: { attempted_at: string; result: string; http_status: number | null; error: string; confirmed_at: string | null } | null;

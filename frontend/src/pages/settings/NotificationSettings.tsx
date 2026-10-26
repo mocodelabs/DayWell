@@ -110,7 +110,12 @@ function AlarmSetup() {
                 : !support.push ? (support.ios && !support.standalone ? "On iPhone/iPad, add DayWell to your Home Screen first, then enable push from the installed app." : "This browser doesn't support Web Push.")
                 : subscribed ? <span>Subscribed. <button className="underline" onClick={disablePush}>Turn off for this device</button></span>
                 : <Button size="sm" variant="soft" className="mt-1" onClick={enablePush} loading={busy}>Enable push on this device</Button>}
-              {d.subscriptions.active > 0 && <span className="block">{d.subscriptions.active} device{d.subscriptions.active === 1 ? "" : "s"} subscribed in total.</span>}
+              {!subscribed && support.push && d.push_configured && (
+                <span className="block font-medium">This device won't ring or show reminders while DayWell is closed until you enable push here.</span>
+              )}
+              {d.subscriptions.active > 0 && (
+                <span className="block">Devices that get alarms while DayWell is closed: {d.subscriptions.devices.map((x) => x.label).join(", ")}.</span>
+              )}
               {d.last_push && <span className="block">Last push {formatDateTime(d.last_push.attempted_at, prefs)}: {d.last_push.result === "delivered" ? "shown on a device" : d.last_push.result === "accepted" ? "accepted by the push service (display not yet confirmed)" : `${d.last_push.result}${d.last_push.error ? ` — ${d.last_push.error}` : ""}`}.</span>}
             </Row>
             <Row status={audio === "played" ? "ok" : audio === "blocked" || audio === "unsupported" ? "fail" : "warn"} label="Alarm sound in this browser">

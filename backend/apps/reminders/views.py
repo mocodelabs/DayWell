@@ -161,7 +161,15 @@ class AlarmViewSet(viewsets.GenericViewSet):
                 "time_zone": prefs.time_zone,
                 "local_time": now.astimezone(zone).isoformat(),
                 "push_configured": push.push_configured(),
-                "subscriptions": {"active": subs.filter(active=True).count(), "inactive": subs.filter(active=False).count()},
+                "subscriptions": {
+                    "active": subs.filter(active=True).count(),
+                    "inactive": subs.filter(active=False).count(),
+                    # Which devices can receive alarms while DayWell is closed (labels like "Chrome on Android" only).
+                    "devices": [
+                        {"label": d.device_label or "Unnamed device", "last_success_at": d.last_success_at}
+                        for d in subs.filter(active=True).order_by("-last_success_at", "-id")[:10]
+                    ],
+                },
                 "scheduler": {
                     "heartbeat_at": beat,
                     "healthy": bool(beat) and (now - datetime.fromisoformat(beat)).total_seconds() < 180,

@@ -8,6 +8,7 @@ import { useDashboard, useUnreadCount } from "@/hooks/queries";
 import { useSession, useSignOut } from "@/features/auth/session";
 import { daysUntil, useBilling } from "@/features/billing/billing";
 import { Dialog } from "../ui/Dialog";
+import { PushNudge } from "./PushNudge";
 import { UpNextPanel } from "./UpNextPanel";
 import { useQuickAdd } from "./QuickAddContext";
 
@@ -126,6 +127,7 @@ export function AppShell() {
           </div>
         )}
         <BillingBanner />
+        <PushNudge />
         {missedCount > 0 && location.pathname !== "/notifications" && (
           <Link to="/notifications?tab=missed" className="flex items-center gap-2 bg-terracotta-soft px-4 py-2 text-sm hover:underline">
             <TriangleAlert className="h-4 w-4" aria-hidden /> {missedCount} reminder{missedCount === 1 ? "" : "s"} need{missedCount === 1 ? "s" : ""} your attention. Review them →
