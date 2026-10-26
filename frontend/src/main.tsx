@@ -6,6 +6,7 @@ import { App } from "./App";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ToastProvider } from "./components/ui/Toast";
 import { ApiError } from "./lib/api";
+import "./lib/install"; // listen for the browser's install event before React renders
 import { registerServiceWorker } from "./lib/push";
 import "./styles.css";
 

@@ -7,6 +7,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useDashboard, useUnreadCount } from "@/hooks/queries";
 import { useSession, useSignOut } from "@/features/auth/session";
 import { daysUntil, useBilling } from "@/features/billing/billing";
+import { InstallApp } from "../InstallApp";
 import { Dialog } from "../ui/Dialog";
 import { PushNudge } from "./PushNudge";
 import { UpNextPanel } from "./UpNextPanel";
@@ -93,6 +94,7 @@ export function AppShell() {
           {NAV.map((item) => <SideLink key={item.to} item={item} collapsed={collapsed} />)}
           <SideLink item={{ to: "/notifications", label: "Notifications", icon: Bell }} collapsed={collapsed} badge={unread.data?.count} />
         </nav>
+        <div className="mx-2 mt-2"><InstallApp variant="sidebar" collapsed={collapsed} className="w-full" /></div>
         <button onClick={() => void signOut()} aria-label={`Log out of ${user.display_name || user.email}`} title={collapsed ? "Log out" : undefined}
           className={clsx("mx-2 mt-2 flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted hover:bg-sage-soft hover:text-ink", collapsed && "justify-center px-0")}>
           <LogOut className="h-5 w-5 shrink-0" aria-hidden />
@@ -111,6 +113,7 @@ export function AppShell() {
             <span className="font-[family-name:var(--font-display)] text-lg font-semibold text-primary-strong">DayWell</span>
           </Link>
           <div className="flex items-center gap-1">
+            <InstallApp variant="icon" />
             <TrialBadge />
             <Link to="/notifications" className="relative rounded-full p-2 hover:bg-sage-soft" aria-label={`Notifications${unread.data?.count ? `, ${unread.data.count} unread` : ""}`}>
               <Bell className="h-5 w-5" aria-hidden />
@@ -171,6 +174,7 @@ export function AppShell() {
           ))}
         </nav>
         <div className="mt-4 border-t border-line pt-3">
+          <InstallApp variant="menu" className="mb-2" />
           <p className="mb-2 truncate text-sm text-muted">Signed in as {user.display_name || user.email}</p>
           <button onClick={() => { setMoreOpen(false); void signOut(); }}
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-line p-3 text-sm font-medium hover:bg-sage-soft">

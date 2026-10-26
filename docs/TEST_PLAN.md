@@ -112,7 +112,8 @@ won't share them), more `backend` replicas, short per-user caching of the dashbo
 recurrence expansion nearer the query window.
 
 ## Not covered / still to do
-- Physical Android/iOS push testing — checklist in [REAL_DEVICE_TESTING.md](REAL_DEVICE_TESTING.md) (no device available).
+- Remaining physical-device push cases (Android lock screen / closed app / battery saver; any iOS device) — one Android
+  phone passed the basic background-push test on 2026-10-26; see [REAL_DEVICE_TESTING.md](REAL_DEVICE_TESTING.md).
 - Manual screen-reader and forced-colours checks — [ACCESSIBILITY.md](ACCESSIBILITY.md).
 - Production deployment on a Linux server with a real domain/certificate (verified locally with Caddy's internal CA only).
 - Load test on production-class hardware with the generator on a separate machine.

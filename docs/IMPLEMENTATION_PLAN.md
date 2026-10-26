@@ -78,8 +78,9 @@ accessibility tests — all fixed with regression tests:
 - ✅ Backup/restore scripts; restore drill performed with the shipped scripts against the production compose stack (240 MB dataset)
 - ✅ Full production stack run locally (Caddy TLS → nginx → gunicorn, PostgreSQL, Redis, worker, beat): health checks, HTTPS, CSRF/CORS, secure cookies, restarts and DB/Redis outages verified
 - ✅ Playwright E2E (11-step journey incl. a real alarm + mobile flow)
-- 🟡 Push delivery verified against mocked push services and the real server pipeline; **not verified on a physical
-  phone** (none available) — checklist in REAL_DEVICE_TESTING.md
+- 🟡 Push delivery verified against mocked push services, the real server pipeline, and **one physical Android phone**
+  (2026-10-26: background push displayed with signed receipts in 1–8 s); lock-screen/closed-app/battery-saver cases and
+  iOS still to test — checklist in REAL_DEVICE_TESTING.md
 - 🟡 Monitoring = health endpoints + structured logs + documented alerts; no metrics backend (Prometheus/Sentry) wired
 
 ## Security review summary

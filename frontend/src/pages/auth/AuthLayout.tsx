@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { InstallApp } from "@/components/InstallApp";
 
 export function AuthLayout({ title, subtitle, children, footer }: { title: string; subtitle?: string; children: ReactNode; footer?: ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export function AuthLayout({ title, subtitle, children, footer }: { title: strin
         </div>
         <div className="rounded-[var(--radius-card)] border border-line bg-surface p-5 shadow-[var(--shadow-card)] sm:p-6">{children}</div>
         {footer && <div className="mt-5 text-center text-sm text-muted">{footer}</div>}
+        <div className="mt-6"><InstallApp /></div>
       </main>
     </div>
   );

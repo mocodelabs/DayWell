@@ -1,8 +1,9 @@
 # Real-device notification testing
 
-**Status: NOT yet performed on physical devices.** Push has been verified against mocked push services (unit tests), the
-full server pipeline has been verified in the production Docker stack, and the browser flows run in desktop Chromium.
-No Android or iOS device was available. Run this checklist before launch and record results in the table at the end.
+**Status: first physical device tested on 2026-10-26** (Android phone, Chrome, installed app) against the live trial
+(https://daywell-three.vercel.app) — background push displayed and confirmed. Not yet tested: locked screen over time,
+swiped-away app, reboot, Battery Saver / Do Not Disturb, offline recovery, permission revoke, and any iOS device. Earlier
+verification used mocked push services (unit tests), the production Docker stack and desktop Chromium.
 
 ## Five different things — never conflate them
 
@@ -24,7 +25,7 @@ History: Notifications page shows each occurrence with per-channel results.
 - One test account per device; server log access to correlate `request_id`s.
 
 ## Android (Chrome)
-1. Open the site → menu → **Install app**. Launch from the home-screen icon (standalone window).
+1. Open the site and tap DayWell's own **Install app** button (sign-in page, phone header, or More menu; Chrome's ⋮ → Install app also works). Launch from the home-screen icon (standalone window).
 2. Settings → Notifications → **Enable push on this device** → allow. Expect "Push … Subscribed".
 3. **Play test sound** → hear it. **Test alarm now** → alarm dialog + sound in the app; history shows *in-app: shown on your device*.
 4. **Test in 30 seconds**, then **switch to another app** → a system notification arrives; history shows *Push: shown on your device* (receipt). Tap **Snooze 10 min** on the notification → app opens and confirms snooze; a repeat arrives 10 min later.
@@ -47,7 +48,24 @@ restarts (expected). macOS Focus / Windows Do Not Disturb suppress notifications
 ## Record results
 | Device / OS / browser | Installed? | Permission | Test now (in-app + sound) | Background push | Locked screen | App closed | Snooze from notification | Offline recovery | Observed delay |
 |---|---|---|---|---|---|---|---|---|---|
-| | | | | | | | | | |
+| Android 10 phone (Xiaomi/MIUI-style UI), Chrome, 2026-10-26 | Yes (home-screen app) | Allowed | **Pass** — alarm dialog with Snooze/Dismiss/Silence; `audio_status = played` (3×) | **Pass** — 2 test alarms + morning briefing in the notification shade; receipts `delivered` | Not tested | Not tested separately | Not tested | Not tested | Sent → displayed in **1–8 s** (scheduler tick ≤ 60 s after the due time) |
+| Windows PC, Chrome, 2026-10-15 | No (browser tab) | Allowed | **Pass** — `audio_status = played` | **Pass** — receipt `delivered` | n/a | Browser running, tab closed: not tested | Not tested | Not tested | ~1 s |
+
+### Notes from the first Android test (2026-10-26)
+- **Root cause of the earlier "no notification" report:** the phone had never completed push registration — only the
+  Windows PC was subscribed, so the server had nowhere to send. After reopening the installed app (loading the current
+  build) and tapping **Enable push on this device**, the device registered as "Chrome on Android" and pushes arrived.
+- Changes made because of it: a banner on phones/tablets that aren't subscribed ("Alarms won't ring on this device while
+  DayWell is closed"), the settings page now names the subscribed devices, and failed registrations are reported to the
+  server log (`push enable failed on device`, with the failing step and browser error — no personal data).
+- Server evidence (live database): subscription created 07:55 UTC; deliveries `delivered` with signed receipts at
+  +1 s, +8 s and +1 s after sending. Two later pushes were `accepted` without a receipt (notification not yet shown or
+  the receipt not sent) — check again on the next test.
+- On Android with the app closed the notification uses the system notification sound; DayWell's alarm tone plays only
+  in the open app (expected for a PWA — see evidence level 5).
+- **Next on this phone:** steps 5–9 above (lock screen, swiped-away app, Battery Saver/DND, airplane mode, permission
+  revoke). MIUI-style battery management is known to delay background delivery: test with and without
+  *Settings → Apps → DayWell/Chrome → Battery → No restrictions*.
 
 ## If closed-app ringing is required (native plan — not started)
 A PWA cannot ring continuously while closed, bypass silent mode, or wake a sleeping device reliably. If that becomes a
