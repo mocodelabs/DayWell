@@ -70,20 +70,34 @@ export async function subscribeToPush(label: string): Promise<SubscribeResult> {
   const config = await api.get<{ configured: boolean; public_key: string }>("/push/config/");
   if (!config.configured) return { ok: false, reason: "Push isn't configured on this server yet. In-app alarms still work while DayWell is open." };
   const reg = (await navigator.serviceWorker.getRegistration()) ?? (await registerServiceWorker());
-  if (!reg) return { ok: false, reason: "The service worker couldn't be registered in this browser." };
-  await navigator.serviceWorker.ready;
+  if (!reg) return fail("register", null, "The service worker couldn't be registered in this browser.");
+  const ready = await Promise.race([navigator.serviceWorker.ready.then(() => true), new Promise<false>((r) => setTimeout(() => r(false), 10_000))]);
+  if (!ready) return fail("sw_ready", null, "DayWell's background worker didn't start. Close DayWell completely, open it again and retry.");
   let sub = await reg.pushManager.getSubscription();
   if (!sub) {
     try {
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(config.public_key) });
     } catch (e) {
-      return { ok: false, reason: `The browser refused the subscription (${(e as Error).name}).` };
+      const err = e as Error;
+      return fail("subscribe", err, err.name === "AbortError"
+        ? "Your phone's push service refused the registration. Check that Google Play services is up to date and that battery or data saver isn't restricting Chrome, then try again."
+        : `The browser refused the subscription (${err.name}).`);
     }
   }
   const json = sub.toJSON();
-  await api.post("/push/subscriptions/", { endpoint: json.endpoint, keys: json.keys, label });
+  try {
+    await api.post("/push/subscriptions/", { endpoint: json.endpoint, keys: json.keys, label });
+  } catch (e) {
+    return fail("save", e as Error, `DayWell couldn't save this device: ${(e as Error).message}`);
+  }
   setOptIn(true);
   return { ok: true };
+}
+
+/** Tell the server which step failed (error name + browser message only — no endpoint, keys or personal data). */
+function fail(stage: string, err: Error | null, reason: string): SubscribeResult {
+  void api.post("/push/client-report/", { stage, error_name: err?.name ?? "", message: (err?.message ?? "").slice(0, 200) }).catch(() => undefined);
+  return { ok: false, reason };
 }
 
 export async function unsubscribeFromPush(): Promise<void> {

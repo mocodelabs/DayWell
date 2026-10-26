@@ -334,3 +334,14 @@ class TestDiagnosticsDevices:
         body = api.get("/api/v1/alarms/diagnostics/").json()
         assert body["subscriptions"]["active"] == 1
         assert [d["label"] for d in body["subscriptions"]["devices"]] == ["Chrome on Windows"]
+
+
+class TestPushClientReport:
+    def test_device_failure_is_logged_without_personal_data(self, api, user, caplog):
+        res = api.post("/api/v1/push/client-report/", {"stage": "subscribe", "error_name": "AbortError", "message": "Registration failed - push service error"}, HTTP_USER_AGENT="Mozilla/5.0 (Linux; Android 10; K)")
+        assert res.status_code == 204
+        rec = next(r for r in caplog.records if r.getMessage() == "push enable failed on device")
+        assert (rec.platform, rec.stage, rec.error_name) == ("android", "subscribe", "AbortError")
+
+    def test_rejects_unknown_stage(self, api):
+        assert api.post("/api/v1/push/client-report/", {"stage": "whatever"}).status_code == 400

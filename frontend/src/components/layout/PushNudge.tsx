@@ -23,6 +23,8 @@ function dismissedRecently(): boolean {
 export function PushNudge() {
   const location = useLocation();
   const [show, setShow] = useState(false);
+  // Re-check only when leaving the notification settings (where the device may just have been subscribed).
+  const onSettings = location.pathname.startsWith("/settings/notifications");
 
   useEffect(() => {
     const support = pushSupport();
@@ -37,9 +39,9 @@ export function PushNudge() {
       if (!cancelled) setShow(!sub && config.configured);
     })();
     return () => { cancelled = true; };
-  }, [location.pathname]);
+  }, [onSettings]);
 
-  if (!show || location.pathname.startsWith("/settings/notifications")) return null;
+  if (!show || onSettings) return null;
   const dismiss = () => {
     try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch { /* storage unavailable */ }
     setShow(false);

@@ -15,4 +15,5 @@ urlpatterns = [
     path("push/subscriptions/<int:pk>/", views.PushSubscriptionDetailView.as_view()),
     path("push/unsubscribe/", views.PushUnsubscribeByEndpointView.as_view()),
     path("push/receipt/", views.PushReceiptView.as_view()),
+    path("push/client-report/", views.PushClientReportView.as_view()),
 ]

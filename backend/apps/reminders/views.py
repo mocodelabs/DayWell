@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime, timedelta
 
 from django.core.cache import cache
@@ -32,6 +33,8 @@ from .serializers import (
     TestNotificationSerializer,
 )
 from .services import sync_reminder
+
+logger = logging.getLogger("daywell.push")
 
 
 def occurrence_context(request) -> dict:
@@ -263,6 +266,31 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     def read_all(self, request):
         n = self.get_queryset().filter(read_at__isnull=True).update(read_at=timezone.now())
         return Response({"updated": n})
+
+
+class PushClientReportSerializer(serializers.Serializer):
+    stage = serializers.ChoiceField(choices=["register", "sw_ready", "subscribe", "save"])
+    error_name = serializers.CharField(max_length=60, allow_blank=True, required=False)
+    message = serializers.CharField(max_length=200, allow_blank=True, required=False)
+
+
+class PushClientReportView(APIView):
+    """A device reports why enabling push failed, so server logs show phone-side failures (no endpoint/keys/PII)."""
+
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "test_notify"
+
+    def post(self, request):
+        ser = PushClientReportSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        ua = request.headers.get("User-Agent", "")
+        platform = "android" if "Android" in ua else "ios" if ("iPhone" in ua or "iPad" in ua) else "windows" if "Windows" in ua else "other"
+        d = ser.validated_data
+        logger.warning("push enable failed on device", extra={
+            "user_id": request.user.pk, "platform": platform, "stage": d["stage"],
+            "error_name": d.get("error_name", ""), "browser_message": d.get("message", ""),
+        })
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PushConfigView(APIView):
