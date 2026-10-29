@@ -3,7 +3,7 @@
 A calm personal companion for plans, reminders and healthy routines: tasks, calendar, alarms, a warm morning briefing,
 habits, reading, fitness, affirmations, hydration, sleep, journaling and honest insights — in one installable web app.
 
-**Live trial:** https://daywell-three.vercel.app (demo login demo@daywell.test / DayWell-demo-2026). Pushes to `main`
+**Live:** https://daywell.live (demo login demo@daywell.test / DayWell-demo-2026). Pushes to `main`
 deploy automatically via Vercel; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#free-trial-hosting-vercel--neon-showcase-deployment).
 Premium is sold monthly/annually through Paystack (cards + M-Pesa) after a 14-day trial — see [docs/BILLING.md](docs/BILLING.md).
 

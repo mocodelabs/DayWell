@@ -36,7 +36,7 @@ Create an operator account for the Django admin (optional): `docker compose -f d
 
 ## Free trial hosting: Vercel + Neon (showcase deployment)
 
-Live at **https://daywell-three.vercel.app** (Vercel Hobby team `mocode-labs`, project `daywell`; Neon free Postgres
+Live at **https://daywell.live** (custom domain since 2026-10-29; DNS at Namecheap: A `@` → 216.198.79.1 and 64.29.17.1, CNAME `www` → Vercel; `www` and the old `daywell-three.vercel.app` pages redirect permanently to daywell.live, while `/api`, `/internal`, `/health` and `/static` keep answering on the old host for cron-job.org and Paystack). Vercel Hobby team `mocode-labs`, project `daywell`; Neon free Postgres
 `daywell-db` in Frankfurt, connected through the Vercel Marketplace). Meant for trials and demos, not production.
 
 How the Docker stack maps onto it:

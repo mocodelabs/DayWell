@@ -97,6 +97,17 @@
       ],
       "destination": "https://daywell.live/$1",
       "permanent": true
+    },
+    {
+      "source": "/((?!api/|internal/|health/|static/|django-admin/|sw\\.js$).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "daywell-three.vercel.app"
+        }
+      ],
+      "destination": "https://daywell.live/$1",
+      "permanent": true
     }
   ]
 }
