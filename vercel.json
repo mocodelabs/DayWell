@@ -85,5 +85,18 @@
       "path": "/internal/tick/",
       "schedule": "17 3 * * *"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.daywell.live"
+        }
+      ],
+      "destination": "https://daywell.live/$1",
+      "permanent": true
+    }
   ]
 }
