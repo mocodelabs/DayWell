@@ -4,8 +4,13 @@ DayWell Premium is sold monthly or annually through **Paystack** (cards everywhe
 
 | Plan | KES | USD |
 |---|---|---|
-| Monthly | KES 499 | USD 4 |
-| Annual | KES 4,999 (≈17% off) | USD 45 (≈6% off) |
+| Monthly | KES 349 | USD 4.99 |
+| Annual | KES 3,490 (≈17% off) | USD 39.99 (≈33% off) |
+
+These are **early-adopter prices** (since 2026-11-11, migration `billing/0003`), shown on Plan & billing with the label from
+`BILLING_PRICE_LABEL` (default "Early-adopter price"; set it to an empty string to hide it). Every plan unlocks all
+Premium features. Earlier prices were KES 499 / 4,999 and USD 4 / 45; anyone already on an auto-renewing Paystack
+subscription keeps the price they signed up at until they cancel (Paystack plans can't be repriced).
 
 Prices live in the `billing.Plan` table (seeded by migration `billing/0002`); change them in Django admin, then clear
 `paystack_plan_code` so a new Paystack plan is created (Paystack plan amounts are fixed).

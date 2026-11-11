@@ -37,6 +37,8 @@ export interface Billing {
   renewal: Renewal;
   plan: string | null;
   payments_enabled: boolean;
+  /** e.g. "Early-adopter price"; empty when no special pricing applies. */
+  price_label?: string;
   plans: BillingPlan[];
   payments: BillingPayment[];
 }

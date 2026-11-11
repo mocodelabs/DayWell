@@ -1,6 +1,7 @@
 import json
 import logging
 
+from django.conf import settings
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions, serializers
@@ -50,6 +51,7 @@ def billing_status(user) -> dict:
         "renewal": acct.renewal,
         "plan": acct.plan.code if acct.plan else None,
         "payments_enabled": paystack.configured(),
+        "price_label": settings.BILLING_PRICE_LABEL,
         "plans": PlanSerializer(Plan.objects.filter(active=True), many=True).data,
         "payments": PaymentSerializer(user.payments.exclude(status=Payment.Status.PENDING).select_related("plan")[:20], many=True).data,
     }

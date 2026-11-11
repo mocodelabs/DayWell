@@ -118,6 +118,10 @@ function BillingPanel({ data, defaultCurrency }: { data: BillingData; defaultCur
         <Card aria-labelledby="choose-plan">
           <CardHeader id="choose-plan" title={data.state === "active" ? "Extend Premium" : "Choose a plan"} icon={CreditCard}
             action={<SegmentedControl label="Currency" value={currency} onChange={(v) => { setCurrency(v); setSelected(null); }} options={[{ value: "KES", label: "KES" }, { value: "USD", label: "USD" }]} />} />
+          <p className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+            {data.price_label && <Badge tone="amber">{data.price_label}</Badge>}
+            <span>Unlocks <strong>all Premium features</strong> — habits, reading, fitness, journal, wellness, insights and the smart planner.</span>
+          </p>
           <div role="radiogroup" aria-label="Billing period" className="grid gap-3 sm:grid-cols-2">
             {plans.map((p) => <PlanOption key={p.code} plan={p} monthly={monthly} checked={chosen?.code === p.code} onSelect={() => setSelected(p.code)} />)}
           </div>

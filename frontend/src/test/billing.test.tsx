@@ -6,15 +6,15 @@ import Billing from "@/pages/settings/Billing";
 import { mockApi, renderApp, testPrefs } from "./utils";
 
 const plans: BillingData["plans"] = [
-  { code: "monthly-kes", name: "Monthly (KES)", interval: "monthly", currency: "KES", amount_minor: 49_900, auto_renew_available: true, mpesa_available: true },
-  { code: "annual-kes", name: "Annual (KES)", interval: "annually", currency: "KES", amount_minor: 499_900, auto_renew_available: true, mpesa_available: true },
-  { code: "monthly-usd", name: "Monthly (USD)", interval: "monthly", currency: "USD", amount_minor: 400, auto_renew_available: true, mpesa_available: false },
-  { code: "annual-usd", name: "Annual (USD)", interval: "annually", currency: "USD", amount_minor: 4_500, auto_renew_available: false, mpesa_available: false },
+  { code: "monthly-kes", name: "Monthly (KES)", interval: "monthly", currency: "KES", amount_minor: 34_900, auto_renew_available: true, mpesa_available: true },
+  { code: "annual-kes", name: "Annual (KES)", interval: "annually", currency: "KES", amount_minor: 349_000, auto_renew_available: true, mpesa_available: true },
+  { code: "monthly-usd", name: "Monthly (USD)", interval: "monthly", currency: "USD", amount_minor: 499, auto_renew_available: true, mpesa_available: false },
+  { code: "annual-usd", name: "Annual (USD)", interval: "annually", currency: "USD", amount_minor: 3_999, auto_renew_available: false, mpesa_available: false },
 ];
 
 function billing(over: Partial<BillingData> = {}): BillingData {
   const inFiveDays = new Date(Date.now() + 5 * 86_400_000).toISOString();
-  return { state: "trial", has_premium: true, trial_ends_at: inFiveDays, paid_until: null, renewal: "none", plan: null, payments_enabled: true, plans, payments: [], ...over };
+  return { state: "trial", has_premium: true, trial_ends_at: inFiveDays, paid_until: null, renewal: "none", plan: null, payments_enabled: true, price_label: "Early-adopter price", plans, payments: [], ...over };
 }
 
 afterEach(() => vi.unstubAllGlobals());
@@ -26,7 +26,9 @@ describe("Plan & billing", () => {
     expect(await screen.findByText(/5 days left/)).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /Annual/ })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByText(/M-Pesa or card/)).toBeInTheDocument();
-    expect(screen.getByText(/Save 17%/)).toBeInTheDocument();
+    expect(screen.getByText(/Save 17%/)).toBeInTheDocument(); // KES 3,490 vs 12 × 349
+    expect(screen.getByText("Early-adopter price")).toBeInTheDocument();
+    expect(screen.getByText(/all Premium features/)).toBeInTheDocument();
   });
 
   it("starts Paystack checkout for the chosen plan and payment method", async () => {
@@ -55,7 +57,7 @@ describe("Plan & billing", () => {
     const { calls } = mockApi({
       "GET /api/v1/billing/": billing(),
       "POST /api/v1/billing/verify/": {
-        payment: { reference: "dw_9", plan: "annual-kes", kind: "checkout", auto_renew: false, amount_minor: 499_900, currency: "KES", status: "success", channel: "mobile_money", period_start: null, period_end: null, paid_at: new Date().toISOString(), created_at: new Date().toISOString() },
+        payment: { reference: "dw_9", plan: "annual-kes", kind: "checkout", auto_renew: false, amount_minor: 349_000, currency: "KES", status: "success", channel: "mobile_money", period_start: null, period_end: null, paid_at: new Date().toISOString(), created_at: new Date().toISOString() },
         billing: billing({ state: "active", paid_until: new Date(Date.now() + 365 * 86_400_000).toISOString(), plan: "annual-kes" }),
       },
     });

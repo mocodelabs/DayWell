@@ -201,6 +201,8 @@ INLINE_SCHEDULER = env_bool("INLINE_SCHEDULER", False)
 PAYSTACK_SECRET_KEY = env("PAYSTACK_SECRET_KEY", "")
 BILLING_TRIAL_DAYS = int(env("BILLING_TRIAL_DAYS", "14"))
 BILLING_RENEWAL_GRACE_DAYS = int(env("BILLING_RENEWAL_GRACE_DAYS", "3"))
+# Shown next to the prices on Plan & billing (empty string hides it), e.g. while early-adopter prices apply.
+BILLING_PRICE_LABEL = env("BILLING_PRICE_LABEL", "Early-adopter price")
 
 # --- Celery ---
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", REDIS_URL)

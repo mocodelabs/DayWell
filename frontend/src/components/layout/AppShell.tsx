@@ -82,7 +82,7 @@ export function AppShell() {
       {/* Desktop sidebar */}
       <aside className={clsx("sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-line bg-surface lg:flex", collapsed ? "w-[4.5rem]" : "w-60")}>
         <div className={clsx("flex items-center gap-2 px-4 py-5", collapsed && "justify-center px-0")}>
-          <img src="/icons/icon-192.png" alt="" className="h-8 w-8 rounded-lg" />
+          <img src="/icons/logo.svg" alt="" className="h-8 w-8" />
           {!collapsed && <span className="font-[family-name:var(--font-display)] text-xl font-semibold text-primary-strong">DayWell</span>}
         </div>
         <button onClick={openQuickAdd} className={clsx("mx-3 mb-3 flex h-11 items-center gap-2 rounded-[var(--radius-control)] bg-primary px-3 font-medium text-on-primary hover:bg-primary-strong", collapsed && "justify-center")}
@@ -109,7 +109,7 @@ export function AppShell() {
         {/* Mobile top bar */}
         <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-bg/95 px-4 py-2.5 backdrop-blur lg:hidden">
           <Link to="/" className="flex shrink-0 items-center gap-2">
-            <img src="/icons/icon-192.png" alt="" className="h-7 w-7 rounded-lg" />
+            <img src="/icons/logo.svg" alt="" className="h-7 w-7" />
             <span className="font-[family-name:var(--font-display)] text-lg font-semibold text-primary-strong">DayWell</span>
           </Link>
           <div className="flex items-center gap-1">

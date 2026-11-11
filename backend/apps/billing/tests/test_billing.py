@@ -63,7 +63,7 @@ class TestTrialAndReadOnly:
 
     def test_prices_match_the_agreed_price_list(self):
         prices = {p.code: (p.currency, p.amount_minor) for p in Plan.objects.all()}
-        assert prices == {"monthly-kes": ("KES", 49_900), "annual-kes": ("KES", 499_900), "monthly-usd": ("USD", 400), "annual-usd": ("USD", 4_500)}
+        assert prices == {"monthly-kes": ("KES", 34_900), "annual-kes": ("KES", 349_000), "monthly-usd": ("USD", 499), "annual-usd": ("USD", 3_999)}
 
     def test_after_trial_reads_work_but_writes_get_402(self, api, user):
         expire_trial(user)
@@ -104,7 +104,7 @@ class TestCheckout:
         assert res.status_code == 200 and res.json()["authorization_url"] == "https://checkout.paystack.com/abc"
         method, path, payload = call.call_args.args
         assert (method, path) == ("POST", "/transaction/initialize")
-        assert payload["channels"] == ["card", "mobile_money"] and payload["currency"] == "KES" and payload["amount"] == 49_900
+        assert payload["channels"] == ["card", "mobile_money"] and payload["currency"] == "KES" and payload["amount"] == 34_900
         assert "plan" not in payload
         assert payload["callback_url"] == "https://daywell.example/settings/billing"
         assert Payment.objects.get(reference=payload["reference"]).status == "pending"
@@ -226,7 +226,7 @@ class TestWebhook:
         renewal = {
             "status": "success",
             "reference": "T_renew_1",
-            "amount": 400,
+            "amount": 499,
             "currency": "USD",
             "channel": "card",
             "plan": {"plan_code": "PLN_usd_m"},
