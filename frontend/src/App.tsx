@@ -22,6 +22,7 @@ const Settings = lazy(() => import("./pages/settings/Settings"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const Reminders = lazy(() => import("./pages/Reminders"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Landing = lazy(() => import("./pages/Landing"));
 
 function Page({ children }: { children: ReactNode }) {
   return <Suspense fallback={<div className="p-4"><LoadingList rows={4} /></div>}>{children}</Suspense>;
@@ -38,7 +39,7 @@ export function App() {
       <Route path="/welcome" element={<RequireAuth allowOnboarding><Page><Onboarding /></Page></RequireAuth>} />
       <Route
         element={
-          <RequireAuth>
+          <RequireAuth guestHome={<Page><Landing /></Page>}>
             <AlarmProvider>
               <QuickAddProvider>
                 <AppShell />

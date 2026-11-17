@@ -26,7 +26,7 @@ const env = {
 const flushRedis = spawnSync(python, ["-c", "import os, redis; redis.from_url(os.environ['REDIS_URL']).flushdb()"], { cwd: backend, env, stdio: "inherit" });
 if (flushRedis.status !== 0) process.exit(flushRedis.status ?? 1);
 
-for (const args of [["migrate", "--noinput"], ["flush", "--noinput"], ["seed_affirmations"]]) {
+for (const args of [["migrate", "--noinput"], ["flush", "--noinput"], ["seed_affirmations"], ["billing_seed_plans"]]) {
   const r = spawnSync(python, ["manage.py", ...args], { cwd: backend, env, stdio: "inherit" });
   if (r.status !== 0) process.exit(r.status ?? 1);
 }

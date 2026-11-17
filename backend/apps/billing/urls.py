@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("billing/", views.BillingView.as_view()),
+    path("billing/plans/", views.PublicPlansView.as_view()),
     path("billing/checkout/", views.CheckoutView.as_view()),
     path("billing/verify/", views.VerifyView.as_view()),
     path("billing/cancel-renewal/", views.CancelRenewalView.as_view()),

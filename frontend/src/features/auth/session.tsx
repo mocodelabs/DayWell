@@ -40,7 +40,7 @@ function useAppearance(prefs: Preferences | undefined) {
   }, [prefs?.theme, prefs?.reduced_motion, prefs?.text_scale]);
 }
 
-export function RequireAuth({ children, allowOnboarding = false }: { children: ReactNode; allowOnboarding?: boolean }) {
+export function RequireAuth({ children, allowOnboarding = false, guestHome }: { children: ReactNode; allowOnboarding?: boolean; guestHome?: ReactNode }) {
   const me = useMe();
   const qc = useQueryClient();
   const location = useLocation();
@@ -69,7 +69,11 @@ export function RequireAuth({ children, allowOnboarding = false }: { children: R
     );
   }
   const data = me.data as Me | null | undefined;
-  if (!data) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  if (!data) {
+    // Signed-out visitors to the home page see the public landing page; any other page asks them to sign in.
+    if (guestHome && location.pathname === "/") return <>{guestHome}</>;
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  }
   if (!data.preferences.onboarding_completed && !allowOnboarding) return <Navigate to="/welcome" replace />;
   return <SessionCtx.Provider value={{ user: data.user, prefs: data.preferences }}>{children}</SessionCtx.Provider>;
 }

@@ -57,6 +57,20 @@ def billing_status(user) -> dict:
     }
 
 
+class PublicPlansView(APIView):
+    """Prices for the public landing page (no account needed). Same data the signed-in billing page shows."""
+
+    authentication_classes: list = []
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        return Response({
+            "trial_days": settings.BILLING_TRIAL_DAYS,
+            "price_label": settings.BILLING_PRICE_LABEL,
+            "plans": PlanSerializer(Plan.objects.filter(active=True), many=True).data,
+        })
+
+
 class BillingView(APIView):
     def get(self, request):
         return Response(billing_status(request.user))

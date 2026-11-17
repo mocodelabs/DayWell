@@ -281,3 +281,24 @@ class TestPlanSync:
 
         settings.PAYSTACK_SECRET_KEY = ""
         assert sync_plans() == {"skipped": "payments not configured"}
+
+
+class TestPublicPlans:
+    def test_landing_page_prices_need_no_account(self, anon):
+        body = anon.get("/api/v1/billing/plans/").json()
+        assert body["trial_days"] == 14 and body["price_label"]
+        assert {(p["code"], p["amount_minor"]) for p in body["plans"]} == {
+            ("monthly-kes", 34_900), ("annual-kes", 349_000), ("monthly-usd", 499), ("annual-usd", 3_999)
+        }
+        assert "paystack_plan_code" not in body["plans"][0]
+
+
+def test_seed_plans_restores_the_price_list_after_a_flush():
+    from django.core.management import call_command
+
+    from apps.billing.management.commands.billing_seed_plans import PLANS
+
+    Plan.objects.all().delete()
+    call_command("billing_seed_plans")
+    call_command("billing_seed_plans")  # idempotent
+    assert {p.code: p.amount_minor for p in Plan.objects.all()} == {c: a for c, _, _, _, a, _ in PLANS}

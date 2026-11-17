@@ -32,6 +32,18 @@ test.beforeAll(async ({ browser }) => {
   page = await (await browser.newContext()).newPage();
 });
 
+test("landing page is accessible and leads to sign up and log in", async () => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1, name: /Make every day count/ })).toBeVisible();
+  await expect(page.getByText(/349/).first()).toBeVisible(); // prices come from the public plans endpoint
+  await axe(page, "landing");
+  await page.getByRole("banner").getByRole("link", { name: "Log in" }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await page.goto("/");
+  await page.getByRole("banner").getByRole("link", { name: "Sign up" }).click();
+  await expect(page).toHaveURL(/\/register$/);
+});
+
 test("auth pages are accessible", async () => {
   await page.goto("/login");
   await axe(page, "login");
